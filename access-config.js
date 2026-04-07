@@ -1,5 +1,5 @@
 window.ACCESS_CONFIG = {
-  enabled: true,
+  enabled: false,
   codes: [
     "study-room-a",
     "study-room-b",
