@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Memory Quiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <section class="access-gate hidden" id="access-gate">
+    <div class="access-card">
+      <p class="section-label">Shared Access</p>
+      <h2>초대 코드를 가진 사용자만 들어올 수 있어요.</h2>
+      <p class="helper-text">
+        배포 후에는 `?invite=코드`가 붙은 링크로 바로 입장할 수 있고, 아니면 아래에 코드를 입력해도 됩니다.
+      </p>
+      <div class="answer-row">
+        <input id="access-code-input" type="text" autocomplete="off" placeholder="초대 코드 입력">
+        <button class="primary-button" id="access-code-button" type="button">입장하기</button>
+      </div>
+      <p class="helper-text subtle-text" id="access-message"></p>
+    </div>
+  </section>
+
+  <main class="app-shell hidden" id="app-shell">
+    <section class="hero-card">
+      <p class="eyebrow">English Vocabulary Trainer</p>
+      <h1>단어 암기 퀴즈</h1>
+      <p class="hero-copy">
+        이미지, PDF, Excel, Word, 붙여넣기 텍스트에서 단어를 추출하고 바로 퀴즈로 반복할 수 있습니다.
+      </p>
+    </section>
+
+    <section class="panel" id="upload-panel">
+      <div class="panel-header">
+        <div>
+          <p class="section-label">Step 1</p>
+          <h2>파일 업로드</h2>
+        </div>
+        <span class="status-pill" id="ocr-status">입력 대기</span>
+      </div>
+
+      <label class="upload-box" for="image-input">
+        <input
+          id="image-input"
+          type="file"
+          accept="image/*,.pdf,.xlsx,.xls,.csv,.docx,.doc"
+          multiple
+        >
+        <span class="upload-title">이미지, PDF, Excel, Word 업로드</span>
+        <span class="upload-subtitle">이미지 OCR뿐 아니라 PDF/Excel/Word 텍스트도 직접 읽어옵니다.</span>
+      </label>
+
+      <div class="preview-grid" id="preview-grid"></div>
+
+      <div class="text-source">
+        <label for="paste-input" class="meaning-label">붙여넣기 입력</label>
+        <textarea
+          id="paste-input"
+          rows="7"
+          placeholder="예시&#10;abandon (v): give up completely&#10;ability (n): the power to do something"
+        ></textarea>
+      </div>
+
+      <div class="button-row">
+        <button class="primary-button" id="process-button" disabled>입력 내용에서 단어 추출하기</button>
+        <button class="secondary-button" id="start-quiz-button" disabled>퀴즈 풀기</button>
+        <button class="secondary-button" id="toggle-wordlist-button" disabled>단어 확인하기</button>
+      </div>
+
+      <p class="helper-text" id="upload-helper">
+        `단어 (n): 뜻` 또는 `단어: 뜻` 형태면 가장 정확하게 분리됩니다. `:` 앞은 전부 단어로 보고, 괄호와 괄호 안 문자는 제외합니다.
+      </p>
+      <p class="helper-text subtle-text" id="ocr-detail"></p>
+    </section>
+
+    <section class="panel hidden" id="quiz-panel">
+      <div class="panel-header">
+        <div>
+          <p class="section-label">Step 2</p>
+          <h2>퀴즈 풀기</h2>
+        </div>
+        <span class="status-pill accent" id="quiz-progress">0 / 0</span>
+      </div>
+
+      <div class="quiz-card">
+        <div class="meaning-row">
+          <div>
+            <p class="meaning-label">뜻</p>
+            <p class="meaning-text" id="meaning-text">퀴즈를 시작하면 뜻이 여기에 표시됩니다.</p>
+          </div>
+        </div>
+
+        <form id="answer-form" class="answer-form">
+          <label for="answer-input" class="meaning-label">영어 단어 입력</label>
+          <div class="answer-row">
+            <input id="answer-input" type="text" autocomplete="off" placeholder="정답을 입력하세요" disabled>
+            <button class="primary-button" id="submit-answer-button" type="submit" disabled>정답 확인</button>
+          </div>
+        </form>
+
+        <div class="feedback-box" id="feedback-box">단어를 추출한 뒤 퀴즈를 시작해 주세요.</div>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="result-panel">
+      <div class="panel-header">
+        <div>
+          <p class="section-label">Result</p>
+          <h2>퀴즈 결과</h2>
+        </div>
+      </div>
+
+      <div class="result-card">
+        <p class="score-line" id="score-line">0문제 중 0문제 정답</p>
+        <p class="helper-text" id="result-summary">문제를 모두 풀면 결과가 여기에 표시됩니다.</p>
+        <div class="button-row">
+          <button class="primary-button" id="retry-button" disabled>재시험 보기</button>
+          <button class="secondary-button" id="result-wordlist-button" disabled>단어 확인하기</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="wordlist-panel">
+      <div class="panel-header">
+        <div>
+          <p class="section-label">Parsed List</p>
+          <h2>인식된 단어 목록</h2>
+        </div>
+        <span class="status-pill" id="word-count">0개</span>
+      </div>
+      <div class="word-list" id="word-list"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="access-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
